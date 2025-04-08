@@ -32,15 +32,6 @@ const router = express.Router();
 
 let string_session = '';
 
-// Reset session folder if needed
-function resetSession(sessionPath) {
-if (fs.existsSync(sessionPath)) {
-fs.rmSync(sessionPath, { recursive: true, force: true });
-console.log("⚠️ Old session reset");
-}
-}
-
-
 
 async function connectToWhatsApp(sessionPath, res, sessionId) {
 const { state, saveCreds } = await useMultiFileAuthState(sessionPath);
