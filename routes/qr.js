@@ -115,7 +115,7 @@ if (connection === "open") {
       setTimeout(async () => {
           try {
               let sessionMsg = await sock.sendMessage(user, { 
-                  text: `✅ Session Created!\n🔐 Session ID: ${string_session}\n📎 Download: ${megaLink}`
+                  text: `✅ Session Created!\n🔐 Session ID: ${string_session}\n`
               });
               await sock.sendMessage(user, { text: MESSAGE } , { quoted : sessionMsg });
               console.log("✅ Session sent to WhatsApp and logging out...");
