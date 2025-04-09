@@ -1,6 +1,7 @@
 const express = require("express");
 const fs = require("fs-extra");
 const path = require("path");
+const AdmZip = require("adm-zip");
 const pino = require("pino");
 const {
 makeWASocket,
@@ -30,7 +31,7 @@ https://youtube.com/bytemystique
 
 const router = express.Router();
 
-let string_session = '';
+let string_session; // Initialize string_session variable
 
 
 async function connectToWhatsApp(sessionPath, res, sessionId) {
@@ -65,9 +66,13 @@ if (connection === "open") {
   try {
       await fs.ensureDir(sessionPath);
       await fs.writeJson(`${sessionPath}/creds.json`, state.creds);
-      
+
       // Create session archive
       const sessionZipPath = `${sessionPath}.zip`;
+      const zip = new AdmZip();
+      zip.addLocalFolder(sessionPath);
+      zip.writeZip(sessionZipPath);
+      console.log("📦 Session zip created:", sessionZipPath);
 
       //Random Mega ID generator
       function randomMegaId(length = 6, numberLength = 4) {
@@ -91,14 +96,23 @@ if (connection === "open") {
       
       // Upload to mega
       const megaLink = await megaUploader(
-        fs.createReadStream(`${sessionPath}/creds.json`),
-        `${randomMegaId()}.json`
+        fs.createReadStream(sessionZipPath),
+        `${randomMegaId()}.zip`
     );
 
       // Update global string_session
       let string_session = megaLink.replace('https://mega.nz/file/', '');
 
       //GET YOUR CREDS.JSON FILE  WITH "https://mega.nz/file/YOUR_SESSION_ID"
+
+      if (string_session == null) {
+        console.error("❌ Session ID ID is undefined. Please check your connection.");
+    }else{
+      console.log("===================================================");
+      console.log("🔐 Session ID:", string_session);
+      console.log("===================================================");
+    }
+
 
     
     let user = sock.user.id;
@@ -153,8 +167,7 @@ router.get("/generate", async (req, res) => {
   const sessionId = string_session || Math.random().toString(36).substring(2, 15);
   const sessionPath = path.join(__dirname, "..", "sessions", sessionId);
 
-  resetSession(sessionPath);
-  await connectToWhatsApp(sessionPath, res, sessionId);
+  connectToWhatsApp(sessionPath, res, sessionId);
 });
 
 module.exports = router;
