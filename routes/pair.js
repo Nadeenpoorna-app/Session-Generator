@@ -1,40 +1,35 @@
 const express = require('express');
 const fs = require('fs-extra');
 const path = require('path');
+const AdmZip = require("adm-zip");
 const pino = require('pino');
 const {
     default: makeWASocket,
     useMultiFileAuthState,
     delay,
     makeCacheableSignalKeyStore,
-    Browsers
+    Browsers,
+    DisconnectReason
 } = require("@whiskeysockets/baileys");
+const { Boom } = require("@hapi/boom");
 const megaUploader = require("../utils/megaUploader");
+const MESSAGE = process.env.MESSAGE ||  `
+🚀 *SESSION GENERATED SUCCESSFULY* ✅
+
+✨ *Gɪᴠᴇ ᴀ ꜱᴛᴀʀ ᴛᴏ ʀᴇᴘᴏ ꜰᴏʀ ᴄᴏᴜʀᴀɢᴇ* 🌟
+https://github.com/Sutauruki/Sutauruki-Md_Session-Generator
+
+💭 *Sᴜᴘᴘᴏʀᴛ Gʀᴏᴜᴘ ꜰᴏʀ ϙᴜᴇʀʏ* 💭
+-----
+
+
+🎥 *Yᴏᴜ-ᴛᴜʙᴇ ᴛᴜᴛᴏʀɪᴀʟꜱ* 💻
+https://youtube.com/bytemystique
+
+🔗 *SUTAURUKI-MD__SESSION-GENERATOR* 🔗
+`
 
 const router = express.Router();
-
-// Reset session folder if needed
-function resetSession(sessionPath) {
-    if (fs.existsSync(sessionPath)) {
-        fs.rmSync(sessionPath, { recursive: true, force: true });
-        console.log("⚠️ Old session reset");
-    }
-}
-
-async function clearAllSessions() {
-    const sessionsPath = path.join(__dirname, "..", "sessions");
-    try {
-        if (fs.existsSync(sessionsPath)) {
-            await fs.emptyDir(sessionsPath);
-            console.log("🗑️ All previous sessions cleared");
-        } else {
-            await fs.mkdir(sessionsPath);
-            console.log("📁 Sessions directory created");
-        }
-    } catch (err) {
-        console.error("❌ Error clearing sessions:", err);
-    }
-}
 
 async function connectToWhatsApp(sessionPath, res, sessionId, phoneNumber) {
     const { state, saveCreds } = await useMultiFileAuthState(sessionPath);
@@ -46,9 +41,13 @@ async function connectToWhatsApp(sessionPath, res, sessionId, phoneNumber) {
         },
         printQRInTerminal: false,
         logger: pino({ level: "fatal" }).child({ level: "fatal" }),
-        browser: Browsers.macOS("Safari"),
+        browser: Browsers.ubuntu("Chrome"),
         mobile: false,
-        pairingCode: true
+        pairingCode: true,
+        version: [2, 2323, 4],
+        connectTimeoutMs: 60000,
+        defaultQueryTimeoutMs: 60000,  // Add timeout for queries
+        emitOwnEvents: true           // Enable event emission
     });
 
     try {
@@ -73,37 +72,123 @@ async function connectToWhatsApp(sessionPath, res, sessionId, phoneNumber) {
         return;
     }
 
+    sock.ev.on('creds.update', saveCreds);
     sock.ev.on("connection.update", async (update) => {
         const { connection, lastDisconnect } = update;
         console.log('Connection status:', connection);
 
         if (connection === "open") {
+            await delay(10000);
+            console.log("✅ Connected via Pair-Code!");
             try {
                 await fs.ensureDir(sessionPath);
                 await fs.writeJson(`${sessionPath}/creds.json`, state.creds);
 
-                const megaLink = await megaUploader(
-                    fs.createReadStream(`${sessionPath}/creds.json`),
-                    `session-${sessionId}.json`
-                );
+                // Create session archive
+                      const sessionZipPath = `${sessionPath}.zip`;
+                      const zip = new AdmZip();
+                      zip.addLocalFolder(sessionPath);
+                      zip.writeZip(sessionZipPath);
+                      console.log("📦 Session zip created:", sessionZipPath);
 
-                await sock.sendMessage(`${phoneNumber}@s.whatsapp.net`, {
-                    text: `✅ *Session Created!*\n\n🔐 *Session ID:* ${sessionId}\n📎 *Download:* ${megaLink}`
-                });
+                      //Random Mega ID generator
+                            function randomMegaId(length = 6, numberLength = 4) {
+                      
+                              const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                      
+                              let result = '';
+                      
+                              for (let i = 0; i < length; i++) {
+                      
+                              result += characters.charAt(Math.floor(Math.random() * characters.length));
+                      
+                                }
+                      
+                               const number = Math.floor(Math.random() * Math.pow(10, numberLength));
+                      
+                                return `${result}${number}`;
+                      
+                                }
+                      
+                            
+                            // Add retry mechanism for Mega upload
+            let retries = 3;
+            let megaLink;
+            while (retries > 0) {
+                try {
+                    megaLink = await megaUploader(
+                        fs.createReadStream(sessionZipPath),
+                        `${randomMegaId()}.zip`
+                    );
+                    break;
+                } catch (err) {
+                    console.error(`Upload attempt failed, retries left: ${--retries}`);
+                    await delay(1000);
+                }
+            }
 
-                console.log("✅ Session info sent, logging out...");
-                await sock.logout();
-            } catch (err) {
-                console.error("❌ Error after connection:", err);
+            if (!megaLink) {
+                throw new Error("Failed to upload session after multiple attempts");
+            }
+                      
+                            // Update global string_session
+                            let string_session = megaLink.replace('https://mega.nz/file/', '');
+                      
+                            //GET YOUR CREDS.JSON FILE  WITH "https://mega.nz/file/YOUR_SESSION_ID"
+                      
+                            if (string_session == null) {
+                              console.error("❌ Session ID ID is undefined. Please check your connection.");
+                          }else{
+                            console.log("===================================================");
+                            console.log("🔐 Session ID:", string_session);
+                            console.log("===================================================");
+                          }
+
+                          let user = sock.user.id;
+
+      setTimeout(async () => {
+          try {
+              let sessionMsg = await sock.sendMessage(user, { 
+                  text: `✅ Session Created!\n🔐 Session ID: ${string_session}\n`
+              });
+              await sock.sendMessage(user, { text: MESSAGE } , { quoted : sessionMsg });
+              console.log("✅ Session sent to WhatsApp and logging out...");
+              await sock.logout();
+          } catch (err) {
+              console.error("❌ Failed to send or logout:", err);
+          }
+      }, 4000);
+  } catch (err) {
+                console.error("❌ Error after login:", err);
+                if (!res.headersSent) {
+                    res.status(500).json({
+                        status: 'error',
+                        error: "Session creation failed"
+                    });
+                }
             }
         }
 
         if (connection === "close") {
-          const statusCode = lastDisconnect?.error?.output?.statusCode;
-          const errorMsg = lastDisconnect?.error?.message;
-          console.warn(`⚠️ Connection closed. Code: ${statusCode} | Message: ${errorMsg}`);
+            const shouldReconnect = (lastDisconnect?.error instanceof Boom) &&
+                lastDisconnect.error.output.statusCode !== DisconnectReason.loggedOut;
+            
+            console.log('Connection closed due to:', lastDisconnect?.error?.message);
+            
+            if (shouldReconnect) {
+                console.log('Reconnecting...');
+                connectToWhatsApp(sessionPath, res, sessionId, phoneNumber);
+            } else {
+                console.log('Connection closed permanently');
+                if (!res.headersSent) {
+                    res.status(500).json({
+                        status: 'error',
+                        error: "Connection terminated"
+                    });
+                }
+            }
         }
-    });
+    })
 
     sock.ev.on("creds.update", saveCreds);
 }
@@ -125,11 +210,8 @@ router.post("/generate", async (req, res) => {
             });
         }
 
-        await clearAllSessions();
-
         const sessionId = `session-${Date.now()}`;
         const sessionPath = path.join(__dirname, "..", "sessions", sessionId);
-        resetSession(sessionPath);
 
         console.log('🚀 Initiating connection for:', formattedPhone);
         await connectToWhatsApp(sessionPath, res, sessionId, formattedPhone);

@@ -17,7 +17,7 @@ const MESSAGE = process.env.MESSAGE ||  `
 🚀 *SESSION GENERATED SUCCESSFULY* ✅
 
 ✨ *Gɪᴠᴇ ᴀ ꜱᴛᴀʀ ᴛᴏ ʀᴇᴘᴏ ꜰᴏʀ ᴄᴏᴜʀᴀɢᴇ* 🌟
-https://github.com/Sutauruki/Satauruki_md.git
+https://github.com/Sutauruki/Sutauruki-Md_Session-Generator
 
 💭 *Sᴜᴘᴘᴏʀᴛ Gʀᴏᴜᴘ ꜰᴏʀ ϙᴜᴇʀʏ* 💭
 -----
