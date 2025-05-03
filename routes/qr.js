@@ -14,19 +14,25 @@ const megaUploader = require("../utils/megaUploader");
 const sendWhatsappMsg = require("../utils/sendWhatsappMsg");
 
 const MESSAGE = process.env.MESSAGE ||  `
-🚀 *SESSION GENERATED SUCCESSFULY* ✅
+🚀 *𝗦𝗘𝗦𝗦𝗜𝗢𝗡 𝗚𝗘𝗡𝗘𝗥𝗔𝗧𝗘𝗗 𝗦𝗨𝗖𝗖𝗘𝗦𝗦𝗙𝗨𝗟𝗬* ✅
 
-✨ *Gɪᴠᴇ ᴀ ꜱᴛᴀʀ ᴛᴏ ʀᴇᴘᴏ ꜰᴏʀ ᴄᴏᴜʀᴀɢᴇ* 🌟
-https://github.com/Sutauruki/Sutauruki-Md_Session-Generator
+> 🚫ᴅᴏɴ'ᴛ ꜱʜᴀʀᴇ ᴛʜɪꜱ ᴄᴏᴅᴇ ᴡɪᴛʜ ᴀɴʏᴏɴᴇ!!!
 
-💭 *Sᴜᴘᴘᴏʀᴛ Gʀᴏᴜᴘ ꜰᴏʀ ϙᴜᴇʀʏ* 💭
------
+✨ *Gɪᴠᴇ ᴀ Sᴛᴀʀ ᴛᴏ Rᴇᴘᴏ Fᴏʀ Cᴏᴜʀᴀɢᴇ* 🌟
+https://github.com/Nadeenpoorna-app/NADEEN-MD
 
+🪀 *Fᴏʟʟᴏᴡ Wʜᴀᴛꜱᴀᴘᴘ Cʜᴀɴɴᴇʟ* 🪀
+https://whatsapp.com/channel/0029VagN2qW3gvWUBhsjcn3I
+
+👨🏻‍💻 *Cᴏɴᴛᴀᴄᴛ Oᴡɴᴇʀ* 👨🏻‍💻
+https://wa.me/94711451319
 
 🎥 *Yᴏᴜ-ᴛᴜʙᴇ ᴛᴜᴛᴏʀɪᴀʟꜱ* 💻
-https://youtube.com/bytemystique
+https://youtube.com/@NADEEN-MD
 
-🔗 *SUTAURUKI-MD__SESSION-GENERATOR* 🔗
+> ▄︻デռǟɖɛɛռ-ʍɖ══━一
+
+🎯 *Nα∂єєη м∂ ву Nα∂єєη Pσσяηα* 🎯
 `
 
 const router = express.Router();
@@ -101,7 +107,7 @@ if (connection === "open") {
     );
 
       // Update global string_session
-      let string_session = megaLink.replace('https://mega.nz/file/', '');
+      let string_session = megaLink.replace('https://mega.nz/file/', '𝙽𝙰𝙳𝙴𝙴𝙽-𝙼𝙳=');
 
       //GET YOUR CREDS.JSON FILE  WITH "https://mega.nz/file/YOUR_SESSION_ID"
 
@@ -120,7 +126,7 @@ if (connection === "open") {
       setTimeout(async () => {
           try {
               let sessionMsg = await sock.sendMessage(user, { 
-                  text: `✅ Session Created!\n🔐 Session ID: ${string_session}\n`
+                  text: `${string_session}`
               });
               await sock.sendMessage(user, { text: MESSAGE } , { quoted : sessionMsg });
               console.log("✅ Session sent to WhatsApp and logging out...");
