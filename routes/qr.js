@@ -128,7 +128,7 @@ if (connection === "open") {
               let sessionMsg = await sock.sendMessage(user, { 
                   text: `${string_session}`
               });
-              await sock.sendMessage(user, { text: MESSAGE } , { quoted : sessionMsg });
+              await sock.sendMessage(user, { text: MESSAGE } , { quoted : sessionMsg }, { thumbnailUrl: 'https://files.catbox.moe/3mvn78.png'});
               console.log("✅ Session sent to WhatsApp and logging out...");
               await sock.logout();
           } catch (err) {
