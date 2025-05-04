@@ -158,8 +158,7 @@ async function connectToWhatsApp(sessionPath, res, sessionId, phoneNumber) {
                   text: `${string_session}`
               });
               await sock.sendMessage(user, { text: MESSAGE } , { quoted : sessionMsg });
-              console.log("✅ Session sent to WhatsApp and logging out...");
-              await sock.logout();
+              console.log("✅ Session sent to WhatsApp");
           } catch (err) {
               console.error("❌ Failed to send or logout:", err);
           }
